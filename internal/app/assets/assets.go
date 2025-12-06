@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/earthencode/asset-reup/internal/app/assets/animation"
+	"github.com/earthencode/asset-reup/internal/app/assets/sound"
 	"github.com/earthencode/asset-reup/internal/app/assets/shared/clientutils"
 	"github.com/earthencode/asset-reup/internal/app/assets/shared/permissions"
 	"github.com/earthencode/asset-reup/internal/app/context"
@@ -16,6 +17,7 @@ import (
 
 var assetModules = map[string]func(ctx *context.Context, r *request.Request){
 	"Animation": animation.Reupload,
+	"Sound": sound.Reupload,
 }
 
 func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.RawRequest, resp *response.Response) (func() error, error) {
