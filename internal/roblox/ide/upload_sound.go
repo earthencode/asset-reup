@@ -52,7 +52,7 @@ func newUploadSoundRequest(groupID int64, name, description string, fileData *by
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", "https://apis.roblox.com/assets/v1/audio", bytes.NewReader(bodyBytes))
+	req, err := http.NewRequest("POST", "https://apis.roblox.com/developer-tools/v1/audio", bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
