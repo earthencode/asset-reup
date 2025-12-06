@@ -1,4 +1,4 @@
-package animation
+package sound
 
 import (
 	"errors"
@@ -25,7 +25,7 @@ import (
 	"github.com/earthencode/asset-reup/internal/taskqueue"
 )
 
-const assetTypeID int32 = 24
+const assetTypeID int32 = 3
 
 var ErrUnauthorized = errors.New("authentication required to access asset")
 
