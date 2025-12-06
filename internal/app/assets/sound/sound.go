@@ -127,9 +127,9 @@ func Reupload(ctx *context.Context, r *request.Request) {
 					}
 
 					switch err {
-					case ide.UploadAnimationErrors.ErrNotLoggedIn:
+					case ide.UploadSoundErrors.ErrNotLoggedIn:
 						clientutils.GetNewCookie(ctx, r, "cookie expired")
-					case ide.UploadAnimationErrors.ErrInappropriateName:
+					case ide.UploadSoundErrors.ErrInappropriateName:
 						assetInfo.Name = fmt.Sprintf("(%s) [Censored]", assetInfo.Name)
 					default:
 						switch err.(type) {
