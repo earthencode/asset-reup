@@ -12,7 +12,7 @@ import (
 	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
-var UploadAnimationErrors = struct {
+var UploadSoundErrors = struct {
 	ErrNotLoggedIn       error
 	ErrTokenInvalid      error
 	ErrInappropriateName error
@@ -22,7 +22,7 @@ var UploadAnimationErrors = struct {
 	ErrInappropriateName: errors.New("inappropriate name or description"),
 }
 
-func newAnimationURL(groupID int64, name, description string) string {
+func newSoundURL(groupID int64, name, description string) string {
 	url := fmt.Sprintf("https://www.roblox.com/ide/publish/UploadNewAnimation?assetTypeName=Animation&name=%s&description=%s",
 		url.QueryEscape(name),
 		url.QueryEscape(description),
@@ -34,13 +34,13 @@ func newAnimationURL(groupID int64, name, description string) string {
 	return url
 }
 
-func newUploadAnimationRequest(
+func newUploadSoundRequest(
 	groupID int64,
 	name,
 	description string,
 	data *bytes.Buffer,
 ) (*http.Request, error) {
-	url := newAnimationURL(groupID, name, description)
+	url := newSoundURL(groupID, name, description)
 	req, err := http.NewRequest("POST", url, data)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func NewUploadSoundHandler(
 	groupID ...int64,
 ) (func() (int64, error), error) {
 	group := groupID[0]
-	req, err := newUploadAnimationRequest(group, name, description, data)
+	req, err := newUploadSoundRequest(group, name, description, data)
 	if err != nil {
 		return func() (int64, error) { return 0, nil }, err
 	}
@@ -91,17 +91,17 @@ func NewUploadSoundHandler(
 			return id, nil
 		case http.StatusForbidden:
 			if strBody := string(body); strBody == "NotLoggedIn" {
-				return 0, UploadAnimationErrors.ErrNotLoggedIn
+				return 0, UploadSoundErrors.ErrNotLoggedIn
 			} else if strBody == "XSRF Token Validation Failed" {
 				c.SetToken(resp.Header.Get("x-csrf-token"))
-				return 0, UploadAnimationErrors.ErrTokenInvalid
+				return 0, UploadSoundErrors.ErrTokenInvalid
 			}
 
 			return 0, errors.New(resp.Status)
 		case http.StatusUnprocessableEntity:
 			if string(body) == "Inappropriate name or description." {
-				req, _ = newUploadAnimationRequest(group, "[Censored]", description, data)
-				return 0, UploadAnimationErrors.ErrInappropriateName
+				req, _ = newUploadSoundRequest(group, "[Censored]", description, data)
+				return 0, UploadSoundErrors.ErrInappropriateName
 			}
 
 			return 0, errors.New(resp.Status)
