@@ -2,14 +2,11 @@ package ide
 
 import (
 	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
-	"net/url"
-	"strconv"
 
-	"mime/multipart"
 	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
@@ -34,21 +31,6 @@ type uploadAudioRequest struct {
 	AssetPrivacy      int    `json:"assetPrivacy,omitempty"`
 }
 
-func newSoundURL(groupID int64, name, description string) string {
-    base := "https://apis.roblox.com/developer-tools/v1/assets/upload"
-
-    values := url.Values{}
-    values.Set("assetType", "Audio")
-    values.Set("name", name)
-    values.Set("description", description)
-
-    if groupID > 0 {
-        values.Set("groupId", fmt.Sprintf("%d", groupID))
-    }
-
-    return base + "?" + values.Encode()
-}
-
 func newUploadSoundRequest(groupID int64, name, description string, fileData *bytes.Buffer) (*http.Request, error) {
 	encodedFile := base64.StdEncoding.EncodeToString(fileData.Bytes())
 
@@ -66,7 +48,7 @@ func newUploadSoundRequest(groupID int64, name, description string, fileData *by
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", "https://apis.roblox.com/developer-tools/v1/audio", bytes.NewReader(bodyBytes))
+	req, err := http.NewRequest("POST", "https://apis.roblox.com/assets/v1/audio", bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
