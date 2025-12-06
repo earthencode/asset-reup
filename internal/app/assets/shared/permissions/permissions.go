@@ -3,11 +3,11 @@ package permissions
 import (
 	"errors"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/context"
-	"github.com/kartFr/Asset-Reuploader/internal/app/request"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox/develop"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox/groups"
+	"github.com/earthencode/asset-reup/internal/app/context"
+	"github.com/earthencode/asset-reup/internal/app/request"
+	"github.com/earthencode/asset-reup/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/roblox/develop"
+	"github.com/earthencode/asset-reup/internal/roblox/groups"
 )
 
 var (

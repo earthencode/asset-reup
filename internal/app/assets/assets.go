@@ -4,14 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets/animation"
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets/shared/clientutils"
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets/shared/permissions"
-	"github.com/kartFr/Asset-Reuploader/internal/app/context"
-	"github.com/kartFr/Asset-Reuploader/internal/app/request"
-	"github.com/kartFr/Asset-Reuploader/internal/app/response"
-	"github.com/kartFr/Asset-Reuploader/internal/console"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/app/assets/animation"
+	"github.com/earthencode/asset-reup/internal/app/assets/shared/clientutils"
+	"github.com/earthencode/asset-reup/internal/app/assets/shared/permissions"
+	"github.com/earthencode/asset-reup/internal/app/context"
+	"github.com/earthencode/asset-reup/internal/app/request"
+	"github.com/earthencode/asset-reup/internal/app/response"
+	"github.com/earthencode/asset-reup/internal/console"
+	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
 var assetModules = map[string]func(ctx *context.Context, r *request.Request){

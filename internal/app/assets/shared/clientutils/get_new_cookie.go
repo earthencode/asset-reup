@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets/shared/permissions"
-	"github.com/kartFr/Asset-Reuploader/internal/app/config"
-	"github.com/kartFr/Asset-Reuploader/internal/app/context"
-	"github.com/kartFr/Asset-Reuploader/internal/app/request"
-	"github.com/kartFr/Asset-Reuploader/internal/color"
-	"github.com/kartFr/Asset-Reuploader/internal/console"
-	"github.com/kartFr/Asset-Reuploader/internal/files"
+	"github.com/earthencode/asset-reup/internal/app/assets/shared/permissions"
+	"github.com/earthencode/asset-reup/internal/app/config"
+	"github.com/earthencode/asset-reup/internal/app/context"
+	"github.com/earthencode/asset-reup/internal/app/request"
+	"github.com/earthencode/asset-reup/internal/color"
+	"github.com/earthencode/asset-reup/internal/console"
+	"github.com/earthencode/asset-reup/internal/files"
 )
 
 var cookieFile = config.Get("cookie_file")

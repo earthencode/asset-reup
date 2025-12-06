@@ -4,12 +4,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets/shared/clientutils"
-	"github.com/kartFr/Asset-Reuploader/internal/app/context"
-	"github.com/kartFr/Asset-Reuploader/internal/app/request"
-	"github.com/kartFr/Asset-Reuploader/internal/retry"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox/develop"
-	"github.com/kartFr/Asset-Reuploader/internal/taskqueue"
+	"github.com/earthencode/asset-reup/internal/app/assets/shared/clientutils"
+	"github.com/earthencode/asset-reup/internal/app/context"
+	"github.com/earthencode/asset-reup/internal/app/request"
+	"github.com/earthencode/asset-reup/internal/retry"
+	"github.com/earthencode/asset-reup/internal/roblox/develop"
+	"github.com/earthencode/asset-reup/internal/taskqueue"
 )
 
 const AssetsInfoChunkSize int = 50

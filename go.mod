@@ -1,4 +1,4 @@
-module github.com/kartFr/Asset-Reuploader
+module github.com/earthencode/asset-reup
 
 go 1.23.3
 

@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"strings"
 
-	"github.com/kartFr/Asset-Reuploader/internal/files"
+	"github.com/earthencode/asset-reup/internal/files"
 )
 
 var (

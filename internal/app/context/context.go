@@ -1,8 +1,8 @@
 package context
 
 import (
-	"github.com/kartFr/Asset-Reuploader/internal/app/response"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/app/response"
+	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
 type Context struct {

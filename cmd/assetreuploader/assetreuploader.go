@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/config"
-	"github.com/kartFr/Asset-Reuploader/internal/color"
-	"github.com/kartFr/Asset-Reuploader/internal/console"
-	"github.com/kartFr/Asset-Reuploader/internal/files"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/app/config"
+	"github.com/earthencode/asset-reup/internal/color"
+	"github.com/earthencode/asset-reup/internal/console"
+	"github.com/earthencode/asset-reup/internal/files"
+	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
 var (

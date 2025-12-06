@@ -1,8 +1,8 @@
 package request
 
 import (
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox/games"
+	"github.com/earthencode/asset-reup/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/roblox/games"
 )
 
 type RawRequest struct {

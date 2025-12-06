@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kartFr/Asset-Reuploader/internal/retry"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/retry"
+	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
 func NewGroupGamesHandler(c *roblox.Client, groupID int64) (func() (*GamesResponse, error), error) {

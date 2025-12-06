@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kartFr/Asset-Reuploader/internal/app/assets"
-	"github.com/kartFr/Asset-Reuploader/internal/app/request"
-	"github.com/kartFr/Asset-Reuploader/internal/app/response"
-	"github.com/kartFr/Asset-Reuploader/internal/color"
-	"github.com/kartFr/Asset-Reuploader/internal/files"
-	"github.com/kartFr/Asset-Reuploader/internal/roblox"
+	"github.com/earthencode/asset-reup/internal/app/assets"
+	"github.com/earthencode/asset-reup/internal/app/request"
+	"github.com/earthencode/asset-reup/internal/app/response"
+	"github.com/earthencode/asset-reup/internal/color"
+	"github.com/earthencode/asset-reup/internal/files"
+	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
 var CompatiblePluginVersion = ""

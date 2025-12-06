@@ -1,6 +1,6 @@
 package assetutils
 
-import "github.com/kartFr/Asset-Reuploader/internal/roblox/assetdelivery"
+import "github.com/earthencode/asset-reup/internal/roblox/assetdelivery"
 
 func NewBatchBodyFromIDs(assetIDs []int64) []*assetdelivery.AssetRequestItem {
 	body := make([]*assetdelivery.AssetRequestItem, 0)
