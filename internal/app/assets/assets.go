@@ -17,7 +17,7 @@ import (
 
 var assetModules = map[string]func(ctx *context.Context, r *request.Request){
 	"Animation": animation.Reupload,
-//	"Sound": sound.Reupload,
+	"Sound": sound.Reupload,
 }
 
 func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.RawRequest, resp *response.Response) (func() error, error) {
