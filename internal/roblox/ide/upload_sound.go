@@ -25,8 +25,8 @@ var UploadSoundErrors = struct {
 func newSoundURL(groupID int64, name, description string) string {
     url := fmt.Sprintf(
         "https://www.roblox.com/ide/publish/UploadNewAudio?name=%s&description=%s",
-        url2.QueryEscape(name),
-        url2.QueryEscape(description),
+        url.QueryEscape(name),
+        url.QueryEscape(description),
     )
 
     if groupID > 0 {
@@ -37,19 +37,36 @@ func newSoundURL(groupID int64, name, description string) string {
 }
 
 func newUploadSoundRequest(
-	groupID int64,
-	name,
-	description string,
-	data *bytes.Buffer,
+    groupID int64,
+    name,
+    description string,
+    fileBytes []byte,
 ) (*http.Request, error) {
-	url := newSoundURL(groupID, name, description)
-	req, err := http.NewRequest("POST", url, data)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "RobloxStudio/WinInet")
 
-	return req, nil
+    url := newSoundURL(groupID, name, description)
+
+    var body bytes.Buffer
+    writer := multipart.NewWriter(&body)
+
+    // The file part with proper filename + content type
+    part, err := writer.CreateFormFile("file", name + ".ogg")
+    if err != nil {
+        return nil, err
+    }
+    part.Write(fileBytes)
+
+    // You MUST close the multipart writer so it writes the final boundary
+    writer.Close()
+
+    req, err := http.NewRequest("POST", url, &body)
+    if err != nil {
+        return nil, err
+    }
+
+    req.Header.Set("User-Agent", "RobloxStudio/WinInet")
+    req.Header.Set("Content-Type", writer.FormDataContentType())
+
+    return req, nil
 }
 
 func NewUploadSoundHandler(
