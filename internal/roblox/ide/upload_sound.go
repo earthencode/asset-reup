@@ -23,6 +23,17 @@ var UploadSoundErrors = struct {
 	ErrInappropriateName: errors.New("inappropriate name or description"),
 }
 
+// request body for Open Cloud API
+type uploadAudioRequest struct {
+	Name              string `json:"name"`
+	File              string `json:"file"` // base64-encoded audio
+	GroupID           int64  `json:"groupId,omitempty"`
+	PaymentSource     string `json:"paymentSource,omitempty"`
+	EstimatedFileSize int64  `json:"estimatedFileSize,omitempty"`
+	EstimatedDuration int64  `json:"estimatedDuration,omitempty"`
+	AssetPrivacy      int    `json:"assetPrivacy,omitempty"`
+}
+
 func newSoundURL(groupID int64, name, description string) string {
     base := "https://apis.roblox.com/developer-tools/v1/assets/upload"
 
@@ -38,58 +49,55 @@ func newSoundURL(groupID int64, name, description string) string {
     return base + "?" + values.Encode()
 }
 
-func newUploadSoundRequest(
-    groupID int64,
-    name,
-    description string,
-    fileData *bytes.Buffer,
-) (*http.Request, error) {
+func newUploadSoundRequest(groupID int64, name, description string, fileData *bytes.Buffer) (*http.Request, error) {
+	encodedFile := base64.StdEncoding.EncodeToString(fileData.Bytes())
 
-    url := newSoundURL(groupID, name, description)
+	reqBody := uploadAudioRequest{
+		Name:              name,
+		File:              encodedFile,
+		GroupID:           groupID,
+		PaymentSource:     "User",
+		EstimatedFileSize: int64(fileData.Len()),
+		AssetPrivacy:      1, // public
+	}
 
-    var body bytes.Buffer
-    writer := multipart.NewWriter(&body)
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, err
+	}
 
-    // Use the filename with extension
-    part, err := writer.CreateFormFile("file", name+".ogg")
-    if err != nil {
-        return nil, err
-    }
+	req, err := http.NewRequest("POST", "https://apis.roblox.com/developer-tools/v1/audio", bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
 
-    // Copy from the buffer into the multipart part
-    _, err = io.Copy(part, fileData)
-    if err != nil {
-        return nil, err
-    }
+	req.Header.Set("User-Agent", "RobloxStudio/WinInet")
+	req.Header.Set("Content-Type", "application/json")
+	// CSRF token and .ROBLOSECURITY cookie will be set in handler
 
-    writer.Close()
-
-    req, err := http.NewRequest("POST", url, &body)
-    if err != nil {
-        return nil, err
-    }
-
-    req.Header.Set("User-Agent", "RobloxStudio/WinInet")
-    req.Header.Set("Content-Type", writer.FormDataContentType())
-
-    return req, nil
+	return req, nil
 }
 
 
+// NewUploadSoundHandler returns a function to upload audio and get the Asset ID
 func NewUploadSoundHandler(
 	c *roblox.Client,
-	name,
-	description string,
+	name, description string,
 	data *bytes.Buffer,
 	groupID ...int64,
 ) (func() (int64, error), error) {
-	group := groupID[0]
-	req, err := newUploadSoundRequest(group, name, description, data)
+	g := int64(0)
+	if len(groupID) > 0 {
+		g = groupID[0]
+	}
+
+	req, err := newUploadSoundRequest(g, name, description, data)
 	if err != nil {
 		return func() (int64, error) { return 0, nil }, err
 	}
 
 	return func() (int64, error) {
+		// Set authentication
 		req.AddCookie(&http.Cookie{
 			Name:  ".ROBLOSECURITY",
 			Value: c.Cookie,
@@ -102,37 +110,23 @@ func NewUploadSoundHandler(
 		}
 		defer resp.Body.Close()
 
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
+		var result struct {
+			AssetID int64 `json:"assetId"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 			return 0, err
 		}
 
 		switch resp.StatusCode {
 		case http.StatusOK:
-			id, err := strconv.ParseInt(string(body), 10, 64)
-			if err != nil {
-				return 0, err
-			}
-
-			return id, nil
+			return result.AssetID, nil
 		case http.StatusForbidden:
-			if strBody := string(body); strBody == "NotLoggedIn" {
-				return 0, UploadSoundErrors.ErrNotLoggedIn
-			} else if strBody == "XSRF Token Validation Failed" {
-				c.SetToken(resp.Header.Get("x-csrf-token"))
-				return 0, UploadSoundErrors.ErrTokenInvalid
-			}
-
-			return 0, errors.New(resp.Status)
+			return 0, errors.New("forbidden: check CSRF token or login")
 		case http.StatusUnprocessableEntity:
-			if string(body) == "Inappropriate name or description." {
-				req, _ = newUploadSoundRequest(group, "[Censored]", description, data)
-				return 0, UploadSoundErrors.ErrInappropriateName
-			}
-
-			return 0, errors.New(resp.Status)
+			return 0, errors.New("unprocessable entity: invalid name/description or file")
 		default:
-			return 0, errors.New(resp.Status)
+			return 0, errors.New("upload failed: " + resp.Status)
 		}
 	}, nil
 }
