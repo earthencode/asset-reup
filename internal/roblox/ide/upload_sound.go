@@ -24,17 +24,18 @@ var UploadSoundErrors = struct {
 }
 
 func newSoundURL(groupID int64, name, description string) string {
-    url := fmt.Sprintf(
-        "https://www.roblox.com/ide/publish/UploadNewAudio?name=%s&description=%s",
-        url.QueryEscape(name),
-        url.QueryEscape(description),
-    )
+    base := "https://apis.roblox.com/developer-tools/v1/assets/upload"
+
+    values := url.Values{}
+    values.Set("assetType", "Audio")
+    values.Set("name", name)
+    values.Set("description", description)
 
     if groupID > 0 {
-        url += fmt.Sprintf("&groupId=%d", groupID)
+        values.Set("groupId", fmt.Sprintf("%d", groupID))
     }
 
-    return url
+    return base + "?" + values.Encode()
 }
 
 func newUploadSoundRequest(
