@@ -5,10 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"log"
 
 	"github.com/earthencode/asset-reup/internal/roblox"
 )
+
+var logger = log.Default()
 
 var UploadSoundErrors = struct {
 	ErrNotLoggedIn       error
@@ -73,18 +77,40 @@ func NewUploadSoundHandler(
 		g = groupID[0]
 	}
 
-	req, err := newUploadSoundRequest(g, name, description, data)
-	if err != nil {
-		return func() (int64, error) { return 0, nil }, err
-	}
-
 	return func() (int64, error) {
-		// Set authentication
+		encodedFile := base64.StdEncoding.EncodeToString(data.Bytes())
+
+		reqBody := uploadAudioRequest{
+			Name:              name,
+			File:              encodedFile,
+			GroupID:           g,
+			PaymentSource:     "User",
+			EstimatedFileSize: int64(data.Len()),
+			AssetPrivacy:      1, // public
+		}
+
+		bodyBytes, err := json.Marshal(reqBody)
+		if err != nil {
+			return 0, err
+		}
+
+		req, err := http.NewRequest("POST", "https://apis.roblox.com/assets/v1/audio", bytes.NewReader(bodyBytes))
+		if err != nil {
+			return 0, err
+		}
+
+		// Authentication
 		req.AddCookie(&http.Cookie{
 			Name:  ".ROBLOSECURITY",
 			Value: c.Cookie,
 		})
-		req.Header.Set("x-csrf-token", c.GetToken())
+		req.Header.Set("User-Agent", "RobloxStudio/WinInet")
+		req.Header.Set("Content-Type", "application/json")
+
+		// Set CSRF token if available
+		if token := c.GetToken(); token != "" {
+			req.Header.Set("x-csrf-token", token)
+		}
 
 		resp, err := c.DoRequest(req)
 		if err != nil {
@@ -92,23 +118,39 @@ func NewUploadSoundHandler(
 		}
 		defer resp.Body.Close()
 
+		// Retry if CSRF token is missing or invalid
+		if resp.StatusCode == http.StatusForbidden {
+			newToken := resp.Header.Get("x-csrf-token")
+			if newToken != "" {
+				c.SetToken(newToken)
+				req.Header.Set("x-csrf-token", newToken)
+
+				resp, err = c.DoRequest(req)
+				if err != nil {
+					return 0, err
+				}
+				defer resp.Body.Close()
+			} else {
+				return 0, errors.New("forbidden: CSRF token missing or invalid")
+			}
+		}
+
+		// Decode JSON response
 		var result struct {
 			AssetID int64 `json:"assetId"`
 		}
-
 		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return 0, err
+			return 0, fmt.Errorf("failed to decode response: %w", err)
 		}
 
+		// Handle HTTP status codes
 		switch resp.StatusCode {
 		case http.StatusOK:
 			return result.AssetID, nil
-		case http.StatusForbidden:
-			return 0, errors.New("forbidden: check CSRF token or login")
 		case http.StatusUnprocessableEntity:
-			return 0, errors.New("unprocessable entity: invalid name/description or file")
+			return 0, errors.New("unprocessable entity: invalid name, description, or file")
 		default:
-			return 0, errors.New("upload failed: " + resp.Status)
+			return 0, fmt.Errorf("upload failed: %s", resp.Status)
 		}
 	}, nil
 }
