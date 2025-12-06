@@ -1,0 +1,19 @@
+[linters]
+    disable-all = true
+    enable = [
+        "gosimple",
+        "gocritic",
+        "gofmt",
+        "staticcheck",
+        "govet",
+        "bodyclose"
+    ]
+
+[linters-settings.gocritic]
+    enabled-tags = [
+        "diagnostic",
+        "style",
+        "performance",
+        "opinionated"
+    ]
+    

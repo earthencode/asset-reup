@@ -1,0 +1,12 @@
+{
+    "name": "AssetReuploader",
+    "tree": {
+        "$className": "Folder",
+        "Plugin": {
+            "$path": "src"
+        },
+        "Version": {
+            "$path": "Version.txt"
+        }
+    }
+}

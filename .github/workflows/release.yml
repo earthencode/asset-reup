@@ -1,0 +1,106 @@
+name: Build new release
+
+permissions:
+    contents: write
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                type: string
+                required: true
+                description: "Version of executable"
+
+jobs:
+    create-release:
+        name: Create Release
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Create tag
+              run: |
+                  git tag ${{ github.event.inputs.version }}
+                  git push origin ${{ github.event.inputs.version }}
+    
+            - name: Create release
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: 
+                gh release create ${{ github.event.inputs.version }} --draft --title v${{ github.event.inputs.version }}
+
+    build-plugin:
+        needs: ["create-release"]
+        name: Build plugin
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+    
+          - name: Setup aftman
+            uses: ok-nick/setup-aftman@v0.4.2
+    
+          - name: Get plugin version
+            run: echo "pluginVersion=$(cat plugin/Version.txt)" >> $GITHUB_ENV
+    
+          - name: Build plugin
+            run: rojo build plugin --output AssetReuploader${{ env.pluginVersion }}.rbxm
+    
+          - name: Upload to release
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: gh release upload ${{ github.event.inputs.version }} AssetReuploader${{ env.pluginVersion }}.rbxm
+
+    build:
+        needs: ["create-release"]
+        strategy:
+          fail-fast: false
+          matrix:
+            include:
+              - os: windows-latest
+                name: windows-x86_64
+                arch: amd64
+    
+              - os: ubuntu-22.04
+                name: linux-x86_64
+                arch: amd64
+    
+              - os: macos-latest
+                name: macos-x86_64
+                arch: amd64
+
+              - os: macos-latest
+                name: macos-arm64
+                arch: arm64
+
+        name: Build ${{ matrix.name }}
+        runs-on: ${{ matrix.os }}
+        steps:
+          - uses: actions/checkout@v4
+
+          - name: Install go
+            uses: actions/setup-go@v5
+            with:
+              go-version: '1.24'
+
+          - name: Build
+            shell: bash
+            run: |
+              VERSION=$(cat plugin/Version.txt | tr -d '\r\n')
+
+              env GOARCH=${{ matrix.arch }} go build \
+              -ldflags="-s -w -X main.CompatiblePluginVersion=${VERSION}" \
+              -o AssetReuploader${{ matrix.os == 'windows-latest' && '.exe' || '' }} \
+              ./cmd/...
+          
+          - name: Upload to release
+            shell: bash
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+            run: |
+              if [ "${{ matrix.os }}" = "windows-latest" ]; then
+                7z a -sdel AssetReuploader-${{ github.event.inputs.version }}-${{ matrix.name }}.zip CHANGELOG.md config.ini LICENSE ./AssetReuploader*
+              else
+                zip -jr AssetReuploader-${{ github.event.inputs.version }}-${{ matrix.name }}.zip CHANGELOG.md config.ini LICENSE ./AssetReuploader*
+              fi
+            
+              gh release upload ${{ github.event.inputs.version }} AssetReuploader-${{ github.event.inputs.version }}-${{ matrix.name }}.zip
