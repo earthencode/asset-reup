@@ -26,8 +26,7 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 		return func() error { return nil }, errors.New(assetType + " module does not exist")
 	}
 
-	fmt.Println("assetType:", assetType)
-
+	logger.Println("assetType", assetType)
 	return func() error {
 		ctx := context.New(c, resp)
 
