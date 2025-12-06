@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"mime/multipart"
 	"github.com/earthencode/asset-reup/internal/roblox"
 )
 
@@ -40,7 +41,7 @@ func newUploadSoundRequest(
     groupID int64,
     name,
     description string,
-    fileBytes []byte,
+    fileData *bytes.Buffer,
 ) (*http.Request, error) {
 
     url := newSoundURL(groupID, name, description)
@@ -48,14 +49,18 @@ func newUploadSoundRequest(
     var body bytes.Buffer
     writer := multipart.NewWriter(&body)
 
-    // The file part with proper filename + content type
-    part, err := writer.CreateFormFile("file", name + ".ogg")
+    // Use the filename with extension
+    part, err := writer.CreateFormFile("file", name+".ogg")
     if err != nil {
         return nil, err
     }
-    part.Write(fileBytes)
 
-    // You MUST close the multipart writer so it writes the final boundary
+    // Copy from the buffer into the multipart part
+    _, err = io.Copy(part, fileData)
+    if err != nil {
+        return nil, err
+    }
+
     writer.Close()
 
     req, err := http.NewRequest("POST", url, &body)
@@ -68,6 +73,7 @@ func newUploadSoundRequest(
 
     return req, nil
 }
+
 
 func NewUploadSoundHandler(
 	c *roblox.Client,
