@@ -87,11 +87,6 @@ func serve(c *roblox.Client) error {
 			return
 		}
 
-		if req.AssetType == "Mesh" || req.AssetType == "Sound" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
 		if exists := assets.DoesModuleExist(req.AssetType); !exists {
 			w.WriteHeader(http.StatusNotFound)
 			return
